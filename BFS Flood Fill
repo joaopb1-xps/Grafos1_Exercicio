@@ -1,0 +1,96 @@
+#include <iostream>
+#include <queue> 
+using namespace std;
+
+struct Coord {
+    int linha, coluna;
+    Coord(int r, int c) : linha(r), coluna(c) {}
+};
+
+// Tamanho máximo da fila
+const int fila_max = 1000;
+
+bool Validacao(int linha_colorir, int coluna_colorir, int linha_max, int coluna_max){
+    return linha_colorir >= 0 && linha_colorir < linha_max && coluna_colorir >=0 && coluna_colorir < coluna_max;
+};
+
+//flood fill através do BFS
+void BFS(int** matrix, int linha, int coluna, int linha_colorir, int coluna_colorir, int nova_cor) {
+    int antiga_cor = matrix[linha_colorir][coluna_colorir];
+    if (antiga_cor == nova_cor) return;
+
+    queue<Coord> q; 
+    int primeiro = 0, rear = 0;
+    q.push(Coord(linha_colorir, coluna_colorir));
+
+    while (!q.empty()) { //roda enquanto a fila n estiver vazia
+        Coord atual = q.primeiro(); //acessa o primeiro da fila
+        q.pop(); //remove o primeiro da fila
+        int linha_informada = atual.linha;
+        int coluna_informada = atual.coluna;
+        matrix[linha_informada][coluna_informada] = nova_cor;
+
+        //valida se os vizinhos são iguais a ele
+        int dr[] = {1, -1, 0, 0};
+        int dc[] = {0, 0, 1, -1};
+        for (int i = 0; i < 4; ++i) {
+            int nova_linha = linha_informada + dr[i];
+            int nova_coluna = coluna_informada + dc[i];
+            if (Validacao(nova_linha, nova_coluna, linha, coluna) && matrix[nova_linha][nova_coluna] == antiga_cor) {
+                q.push(Coord(nova_linha, nova_coluna)); //push insere um elemento na fila
+            }
+        }
+    }
+}
+
+void impressaoMatriz(int** matrix, int linha, int coluna) {
+    for (int i = 0; i < linha; ++i) {
+        for (int j = 0; j < coluna; ++j) {
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main (){
+    int linha, coluna;
+    cout << "Digite o número de linhas da matriz: ";
+    cin >> linha;
+    cout << "Digite o número de colunas da matriz: ";
+    cin >> coluna;
+
+    //memória 
+    int** matrix = new int*[linha];
+    for (int i = 0; i < linha; ++i) {
+        matrix[i] = new int[coluna];
+    }
+
+    cout << "Digite os elementos da matriz:" << endl;
+    for (int i = 0; i < linha; ++i) {
+        for (int j = 0; j < coluna; ++j) {
+            cin >> matrix[i][j];
+        }
+    }
+
+    int preencer_linha, preencher_coluna;
+    cout << "Digite a linha de partida para o flood fill: ";
+    cin >> preencer_linha;
+    cout << "Digite a coluna de partida para o flood fill: ";
+    cin >> preencher_coluna;
+
+    int cor;
+    cout << "Digite a nova cor para preencher: ";
+    cin >> cor;
+
+    BFS(matrix, linha, coluna, preencer_linha, preencher_coluna, cor);
+
+    cout << "\nMatriz após o flood fill:" << endl;
+    impressaoMatriz(matrix, linha, coluna);
+
+    for (int i = 0; i < linha; ++i) {
+        delete[] matrix[i];
+    }
+    delete[] matrix;
+
+    return 0;
+}
